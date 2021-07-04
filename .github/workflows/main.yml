@@ -60,3 +60,12 @@ jobs:
             manifests: |
               k8s/mongodb/deployment.yml
               k8s/mongodb/service.yml
+
+        - name: Deploy web
+          uses: Azure/k8s-deploy@v1
+          with:
+            manifests: |
+              k8s/web/deployment.yml
+              k8s/web/service.yml
+            images:
+              scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
