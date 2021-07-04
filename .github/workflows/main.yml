@@ -1,0 +1,71 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI-CD
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  CI:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - name: Docker Login
+        uses: docker/login-action@v1.10.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USER_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_USER_PASSWORD }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v2.6.1
+        with:
+          context: ./src
+          file: ./src/Dockerfile
+          push: true
+          tags: |
+            scarept/rotten-potatoes:latest
+            scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
+            
+  CD:
+      # The type of runner that the job will run on
+      runs-on: ubuntu-latest
+      needs: [CI]
+      # Steps represent a sequence of tasks that will be executed as part of the job
+      steps:
+        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+        - uses: actions/checkout@v2
+        
+        - name: Kubernetes set context
+          uses: Azure/k8s-set-context@v1.1
+          with:
+            method: kubeconfig
+            kubeconfig: ${{ secrets.KUBE_K8S_CONFIG }}
+            
+        - name: Deploy mongo
+          uses: Azure/k8s-deploy@v1
+          with:
+            manifests: |
+              k8s/mongodb/deployment.yml
+              k8s/mongodb/service.yml
+
+        - name: Deploy web
+          uses: Azure/k8s-deploy@v1
+          with:
+            manifests: |
+              k8s/web/deployment.yml
+              k8s/web/service.yml
+            images:
+              scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
