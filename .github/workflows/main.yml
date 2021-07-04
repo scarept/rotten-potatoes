@@ -37,4 +37,4 @@ jobs:
           push: true
           tags: |
             scarept/rotten-potatoes:latest
-            scarept/rotten-potatoes:${{ github.run_number }}
+            scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
