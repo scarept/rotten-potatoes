@@ -36,8 +36,8 @@ jobs:
           file: ./src/Dockerfile
           push: true
           tags: |
-            scarept/api-produto:latest
-            scarept/api-produto:cicdgenerated_${{ github.run_number }}
+            scarept/rotten-potatoes:latest
+            scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
             
   CD:
       # The type of runner that the job will run on
@@ -65,7 +65,7 @@ jobs:
           uses: Azure/k8s-deploy@v1
           with:
             manifests: |
-              k8s/api/deployment.yml
-              k8s/api/serviceCloud.yml
+              k8s/web/deployment.yml
+              k8s/web/serviceCloud.yml
             images:
-              scarept/api-produto:cicdgenerated_${{ github.run_number }}
+              scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
