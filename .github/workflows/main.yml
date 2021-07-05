@@ -66,6 +66,6 @@ jobs:
           with:
             manifests: |
               k8s/web/deployment.yml
-              k8s/web/service.yml
+              k8s/web/serviceCloud.yml
             images:
               scarept/rotten-potatoes:cicdgenerated_${{ github.run_number }}
